@@ -42,9 +42,9 @@ To test the example application, simply run:
 
 Then set your browser to use `127.0.0.1:8080` as the HTTP proxy, and visit the following URLs:
 
- * http://stackoverflow.com/test
- * http://tsyd.net
- * http://translate.google.com/ (Attempt to translate something.)
+ * <http://stackoverflow.com/test>
+ * <http://tsyd.net>
+ * <http://translate.google.com> (Attempt to translate something.)
 
 ## License
 
