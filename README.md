@@ -1,18 +1,18 @@
-# proxy-mock
+# proxy-tamper
 
-A HTTP proxy library for node.js that allows for selective requests to be mocked.
+A HTTP proxy library for node.js that allows for selective requests to be tampered.
 
 ## Examples
 
 To mock HTTP requests with a string or result of a function call, specify a regular expression for the URL and a string or function:
 
-    var proxy = require('./lib/proxy-mock').start({ port: 8080 });
+    var proxy = require('./lib/proxy-tamper').start({ port: 8080 });
 
-    proxy.mock(/test/, 'mocked');
+    proxy.tamper(/test/, 'tampered');
 
 It is possible to manipulate the original request before it's executed over the proxy. The request object has access to `request.url`, `request.headers`, and `request.method`:
 
-    proxy.mock(/translate\.google\..*?\/translate_a\/t/, function (request) {
+    proxy.tamper(/translate\.google\..*?\/translate_a\/t/, function (request) {
       // disallow translations
       request.url = request.url.replace(/hl=../, 'hl=en').replace(/tl=../, 'tl=en')
         .replace(/sl=../, 'sl=en').replace(/text=.*/, 'text=No+translation+for+you!');
@@ -20,12 +20,12 @@ It is possible to manipulate the original request before it's executed over the 
 
 It is also possible to modify the response before proxying it back to the original request by specifying an `onResponse` handler:
 
-    proxy.mock(/tsyd\.net\/$/, function (request) {
+    proxy.tamper(/tsyd\.net\/$/, function (request) {
       request.onResponse(function (response) {
-        // called when we have the response from the mocked url
+        // called when we have the response from the tampered url
       
         response.body = reverseHeadings(response.body); // reverseHeadings defined elsewhere
-        response.headers['server'] = 'proxy-mock 1337';
+        response.headers['server'] = 'proxy-tamper 1337';
       
         // the onResponse handler must complete the response
         response.complete();

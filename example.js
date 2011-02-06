@@ -1,20 +1,20 @@
-var proxy = require('./lib/proxy-mock');
+var proxy = require('./lib/proxy-tamper');
 
 proxy.start({ port: 8080 }, function (p) {
-  p.mock(/\/test/, 'mocked');
+  p.tamper(/\/test/, 'tampered');
 
-  p.mock(/translate\.google\..*?\/translate_a\/t/, function (request) {
+  p.tamper(/translate\.google\..*?\/translate_a\/t/, function (request) {
     // disallow translations
     request.url = request.url.replace(/hl=../, 'hl=en').replace(/tl=../, 'tl=en')
       .replace(/sl=../, 'sl=en').replace(/text=.*/, 'text=No+translation+for+you!');
   });
 
-  p.mock(/tsyd\.net\/$/, function (request) {
+  p.tamper(/tsyd\.net\/$/, function (request) {
     request.onResponse(function (response) {
-      // called when we have the response from the mocked url
+      // called when we have the response from the tampered url
       
       response.body = reverseHeadings(response.body);
-      response.headers['server'] = 'proxy-mock 1337';
+      response.headers['server'] = 'proxy-tamper 1337';
       
       // the onResponse handler must complete the response
       response.complete();
