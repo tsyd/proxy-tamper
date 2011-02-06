@@ -15,6 +15,35 @@ To mock HTTP requests with a string or result of a function call, specify a regu
       }); 
     });
 
+It is also possible to modify the response before proxying it back to the original request by specifying an `onResponse` handler:
+
+    var proxy = require('./lib/proxy-mock');
+
+    proxy.start({port: 8080}, function (p) {
+      p.mock(/tsyd\.net/, function (request) {
+        request.onResponse(function (response) {
+          // called when we have the response from the mocked url
+          if (response.headers['content-type'] = 'text/html') {
+            var matches = response.body.match(/(<h\d>.*?<\/h\d>)/mg);
+
+            if (matches) {
+              // reverse the text within all header tags
+              matches.forEach(function (match) {
+                var parts = match.match(/(<h\d>)(.*?)(<\/h\d>)/);
+                response.body = response.body.replace(parts[0],
+                  parts[1] + parts[2].split('').reverse().join('') + parts[3]);
+              });
+            }
+          }
+
+          // the onResponse handler must complete the response
+          response.complete();
+        });
+      });
+    });
+
+The `onResponse` handler has read and write access to a subset of the `http.ClientResponse` response object, namely: `response.headers`, `response.statusCode`, and `response.url`. The `onResponse` handler may also modfiy the string representation of the response body by accessing `response.body`. 
+
 ## License
 
 (The MIT License)
