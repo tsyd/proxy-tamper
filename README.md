@@ -6,43 +6,45 @@ A HTTP proxy library for node.js that allows for selective requests to be mocked
 
 To mock HTTP requests with a string or result of a function call, specify a regular expression for the URL and a string or function:
 
-    var proxy = require('./lib/proxy-mock');
+    var proxy = require('./lib/proxy-mock').start({ port: 8080 });
 
-    proxy.start({port: 80}, function (p) {
-      p.mock(/test/, 'mocked');
-      p.mock(/translate/, function () {
-        return '{"responseData": {"translatedText": "La la la."}}'
-      }); 
+    proxy.mock(/test/, 'mocked');
+
+It is possible to manipulate the original request before it's executed over the proxy. The request object has access to `request.url`, `request.headers`, and `request.method`:
+
+    proxy.mock(/translate\.google\..*?\/translate_a\/t/, function (request) {
+      // disallow translations
+      request.url = request.url.replace(/hl=../, 'hl=en').replace(/tl=../, 'tl=en')
+        .replace(/sl=../, 'sl=en').replace(/text=.*/, 'text=No+translation+for+you!');
     });
 
 It is also possible to modify the response before proxying it back to the original request by specifying an `onResponse` handler:
 
-    var proxy = require('./lib/proxy-mock');
-
-    proxy.start({port: 8080}, function (p) {
-      p.mock(/tsyd\.net/, function (request) {
-        request.onResponse(function (response) {
-          // called when we have the response from the mocked url
-          if (response.headers['content-type'] = 'text/html') {
-            var matches = response.body.match(/(<h\d>.*?<\/h\d>)/mg);
-
-            if (matches) {
-              // reverse the text within all header tags
-              matches.forEach(function (match) {
-                var parts = match.match(/(<h\d>)(.*?)(<\/h\d>)/);
-                response.body = response.body.replace(parts[0],
-                  parts[1] + parts[2].split('').reverse().join('') + parts[3]);
-              });
-            }
-          }
-
-          // the onResponse handler must complete the response
-          response.complete();
-        });
+    proxy.mock(/tsyd\.net\/$/, function (request) {
+      request.onResponse(function (response) {
+        // called when we have the response from the mocked url
+      
+        response.body = reverseHeadings(response.body); // reverseHeadings defined elsewhere
+        response.headers['server'] = 'proxy-mock 1337';
+      
+        // the onResponse handler must complete the response
+        response.complete();
       });
     });
 
-The `onResponse` handler has read and write access to a subset of the `http.ClientResponse` response object, namely: `response.headers`, `response.statusCode`, and `response.url`. The `onResponse` handler may also modfiy the string representation of the response body by accessing `response.body`. 
+The `onResponse` handler has read and write access to a subset of the `http.ClientResponse` response object, namely: `response.headers`, `response.statusCode`, and `response.url`. The `onResponse` handler may also modfiy the string representation of the response body by accessing `response.body`.
+
+### Usage
+
+To test the example application, simply run:
+
+    node example.js
+
+Then set your browser to use `127.0.0.1:8080` as the HTTP proxy, and visit the following URLs:
+
+ * http://stackoverflow.com/test
+ * http://tsyd.net
+ * http://translate.google.com/ (Attempt to translate something.)
 
 ## License
 
