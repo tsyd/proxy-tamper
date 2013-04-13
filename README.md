@@ -12,6 +12,7 @@ Or via a git clone:
 
     cd node_modules
     git clone git://github.com/tsyd/proxy-tamper.git
+    npm link
 
 ## Examples
 
