@@ -1,0 +1,29 @@
+{
+  "name": "proxy-tamper",
+  "description": "A HTTP proxy library for node.js that allows for selective requests to be tampered.",
+  "keywords": [
+    "proxy",
+    "tamper"
+  ],
+  "author": {
+    "name": "Thomas Sydorowski"
+  },
+  "version": "0.1.1",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://raw.github.com/tsyd/proxy-tamper/master/LICENSE"
+    }
+  ],
+  "engines": {
+    "node": ">=0.8.0"
+  },
+  "main": "./lib/proxy-tamper.js",
+  "homepage": "http://github.com/tsyd/proxy-tamper",
+  "bugs": "https://github.com/tsyd/proxy-tamper/issues",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tsyd/proxy-tamper.git"
+  },
+  "readmeFilename": "README.md"
+}
