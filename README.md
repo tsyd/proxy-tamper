@@ -2,6 +2,17 @@
 
 A HTTP proxy library for node.js that allows for selective requests to be tampered.
 
+## Install
+
+Either install via npm:
+
+    npm install proxy-tamper
+
+Or via a git clone:
+
+    cd node_modules
+    git clone git://github.com/tsyd/proxy-tamper.git
+
 ## Examples
 
 To mock HTTP requests with a string or result of a function call, specify a regular expression for the URL and a string or function:
