@@ -2,7 +2,7 @@
 
 A HTTP proxy library for node.js that allows for selective requests to be tampered.
 
-## Install
+## Installation
 
 Either install via npm:
 
