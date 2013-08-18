@@ -4,44 +4,72 @@ A HTTP proxy library for node.js that allows for selective requests to be tamper
 
 ## Installation
 
-Either install via npm:
+Either install via `npm`:
 
     npm install proxy-tamper
 
-Or via a git clone:
+Or via a `git clone`:
 
     cd node_modules
     git clone git://github.com/tsyd/proxy-tamper.git
     npm link
 
-## Examples
+## Example
 
-To mock HTTP requests with a string or result of a function call, specify a regular expression for the URL and a string or function:
+The following example demonstrates `proxy-tamper` abilities:
 
-    var proxy = require('./lib/proxy-tamper').start({ port: 8080 });
+    var proxy = require('proxy-tamper').start({port: 8080});
 
-    proxy.tamper(/test/, 'tampered');
+    // block all URLs that contain 'block' in them
+    proxy.tamper(/block/, 'This content is blocked!');
+   
+    // disallow Google 
+    proxy.tamper(/google/, function (request) {
+      request.url = request.url.replace(/google/g, 'bing'); 
+    });
+
+    // replace all instances of 'Apple' with 'Orange' in Techcrunch articles
+    proxy.tamper(/techcrunch.com.*\/$/, function (request) {
+      // gzip encoding is not supported when tampering the body
+      delete request.headers['accept-encoding'];
+
+      request.onResponse(function (response) {
+        // tamper the body
+        response.body = response.body.replace(/Apple/g, 'Orange');
+        response.headers['server'] = 'proxy-tamper 1337';
+
+        // complete the response
+        response.complete();
+      }); 
+    });
+
+To tamper HTTP requests with a string or result of a function call, specify a regular expression for the URL and a string or function:
+
+    proxy.tamper(/block/, 'This content is blocked!');
+
+The response body of all URLs that contain `block` in them will be `This content is blocked!'.
 
 It is possible to manipulate the original request before it's executed over the proxy. The request object has access to `request.url`, `request.headers`, and `request.method`:
 
-    proxy.tamper(/translate\.google\..*?\/translate_a\/t/, function (request) {
-      // disallow translations
-      request.url = request.url.replace(/hl=../, 'hl=en').replace(/tl=../, 'tl=en')
-        .replace(/sl=../, 'sl=en').replace(/text=.*/, 'text=No+translation+for+you!');
+    proxy.tamper(/google/, function (request) {
+      request.url = request.url.replace(/google/g, 'bing'); 
     });
 
 It is also possible to modify the response before proxying it back to the original request by specifying an `onResponse` handler:
+    
+    // replace all instances of 'Apple' with 'Orange' in Techcrunch articles
+    proxy.tamper(/techcrunch.com.*\/$/, function (request) {
+      // gzip encoding is not supported when tampering the body
+      delete request.headers['accept-encoding'];
 
-    proxy.tamper(/tsyd\.net\/$/, function (request) {
       request.onResponse(function (response) {
-        // called when we have the response from the tampered url
-      
-        response.body = reverseHeadings(response.body); // reverseHeadings defined elsewhere
+        // tamper the body
+        response.body = response.body.replace(/Apple/g, 'Orange');
         response.headers['server'] = 'proxy-tamper 1337';
-      
-        // the onResponse handler must complete the response
+
+        // complete the response
         response.complete();
-      });
+      }); 
     });
 
 The `onResponse` handler has read and write access to a subset of the `http.ClientResponse` response object, namely: `response.headers`, `response.statusCode`, and `response.url`. The `onResponse` handler may also modfiy the string representation of the response body by accessing `response.body`.
@@ -54,9 +82,8 @@ To test the example application, simply run:
 
 Then set your browser to use `127.0.0.1:8080` as the HTTP proxy, and visit the following URLs:
 
- * <http://stackoverflow.com/test>
- * <http://tsyd.net>
- * <http://translate.google.com> (Attempt to translate something.)
+ * <http://google.com/block/>
+ * <http://techcrunch.com/tag/apple/>
 
 ## License
 

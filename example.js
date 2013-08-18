@@ -1,38 +1,26 @@
-var proxy = require('./lib/proxy-tamper');
+var proxy = require('./lib/proxy-tamper').start({port: 8080});
 
-proxy.start({ port: 8080 }, function (p) {
-  p.tamper(/\/test/, 'tampered');
+// block all URLs that contain 'block' in them
+proxy.tamper(/block/, 'This content is blocked!');
 
-  p.tamper(/translate\.google\..*?\/translate_a\/t/, function (request) {
-    // disallow translations
-    request.url = request.url.replace(/hl=../, 'hl=en').replace(/tl=../, 'tl=en')
-      .replace(/sl=../, 'sl=en').replace(/text=.*/, 'text=No+translation+for+you!');
-  });
+// disallow Google 
+proxy.tamper(/google/, function (request) {
+  request.url = request.url.replace(/google/g, 'bing'); 
+}); 
 
-  p.tamper(/tsyd\.net\/$/, function (request) {
-    request.onResponse(function (response) {
-      // called when we have the response from the tampered url
-      
-      response.body = reverseHeadings(response.body);
-      response.headers['server'] = 'proxy-tamper 1337';
-      
-      // the onResponse handler must complete the response
-      response.complete();
-    });
+// replace all instances of 'Apple' with 'Orange' in Techcrunch articles
+proxy.tamper(/techcrunch.com.*\/$/, function (request) {
+  console.log('tampering ' + request.url);
+
+  // gzip encoding is not supported when tampering the body
+  delete request.headers['accept-encoding'];
+
+  request.onResponse(function (response) {
+    // tamper the body
+    response.body = response.body.replace(/Apple/g, 'Orange');
+    response.headers['server'] = 'proxy-tamper 1337';
+
+    // complete the response
+    response.complete();
   });
 });
-
-function reverseHeadings (str) {
-  var matches = str.match(/(<h\d>.*?<\/h\d>)/mg);
-
-  if (matches) {
-    // reverse the text within all header tags
-    matches.forEach(function (match) {
-      var parts = match.match(/(<h\d>)(.*?)(<\/h\d>)/);
-      str = str.replace(parts[0],
-          parts[1] + parts[2].split('').reverse().join('') + parts[3]);
-    });
-  }
-
-  return str;
-};
