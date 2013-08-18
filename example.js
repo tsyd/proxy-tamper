@@ -8,7 +8,7 @@ proxy.tamper(/google/, function (request) {
   request.url = request.url.replace(/google/g, 'bing'); 
 }); 
 
-// replace all instances of 'Apple' with 'Orange' in Techcrunch articles
+// replace all instances of 'Apple' with 'Orange' in TechCrunch articles
 proxy.tamper(/techcrunch.com.*\/$/, function (request) {
   console.log('tampering ' + request.url);
 

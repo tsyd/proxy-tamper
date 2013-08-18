@@ -28,7 +28,7 @@ The following example demonstrates `proxy-tamper` abilities:
       request.url = request.url.replace(/google/g, 'bing'); 
     });
 
-    // replace all instances of 'Apple' with 'Orange' in Techcrunch articles
+    // replace all instances of 'Apple' with 'Orange' in TechCrunch articles
     proxy.tamper(/techcrunch.com.*\/$/, function (request) {
       // gzip encoding is not supported when tampering the body
       delete request.headers['accept-encoding'];
@@ -57,7 +57,7 @@ It is possible to manipulate the original request before it's executed over the 
 
 It is also possible to modify the response before proxying it back to the original request by specifying an `onResponse` handler:
     
-    // replace all instances of 'Apple' with 'Orange' in Techcrunch articles
+    // replace all instances of 'Apple' with 'Orange' in TechCrunch articles
     proxy.tamper(/techcrunch.com.*\/$/, function (request) {
       // gzip encoding is not supported when tampering the body
       delete request.headers['accept-encoding'];
