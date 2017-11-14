@@ -74,6 +74,8 @@ It is also possible to modify the response before proxying it back to the origin
 
 The `onResponse` handler has read and write access to a subset of the `http.ClientResponse` response object, namely: `response.headers`, `response.statusCode`, and `response.url`. The `onResponse` handler may also modfiy the string representation of the response body by accessing `response.body`.
 
+To kill the current tamper instance use `proxy.end()`
+
 ### Usage
 
 To test the example application, simply run:
